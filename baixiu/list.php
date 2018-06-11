@@ -11,7 +11,7 @@ $category_id = $_GET['id'];
     LEFT JOIN categories c ON c.`id` = p.`category_id`
     LEFT JOIN users u ON u.`id` = p.`user_id`
     WHERE p.`category_id` = $category_id
-    LIMIT 10";
+    LIMIT 100";
 
 //      $reslist = mysqli_query($conn,$sql1);
 
@@ -54,7 +54,7 @@ $category_id = $_GET['id'];
         <div class="entry">
           <div class="head">
             <span class="sort"><?php echo $value['name']?></span>
-            <a href="javascript:;"><?php echo $value['title']?></a>
+            <a href="detail.php?id=<?php echo $value['id']?>"><?php echo $value['title']?></a>
           </div>
           <div class="main">
             <p class="info"><?php echo $value['nickname']?> 发表于 <?php echo $value['created']?></p>
@@ -77,6 +77,12 @@ $category_id = $_GET['id'];
           </div>
         </div>
         <?php endforeach ?>
+        <!-- 和entry放到一个盒子下面 -->
+        
+         <!--点击加载更多按钮-->
+         <div class="loadmore">
+              <span class="btn">加载更多</span>
+          </div>
         <!-- <div class="entry">
           <div class="head">
             <a href="javascript:;">星球大战：原力觉醒视频演示 电影票68</a>
@@ -148,9 +154,105 @@ $category_id = $_GET['id'];
         </div> -->
       </div>
     </div>
+
     <div class="footer">
       <p>© 2016 XIU主题演示 本站主题由 themebetter 提供</p>
     </div>
   </div>
+  <script src="./static/assets/vendors/jquery/jquery.min.js"></script>
+  <script>
+  $(function(){
+    //为按钮注册事件
+    var pageNum = 1;
+    var pageSize = 20;
+    $('.loadmore .btn').on('click',function(){
+      //页面加载的时候已经渲染一次了，点击按钮相当于取下一页的数据，这里用Ajax从后台拿到数据
+      var categoryid = location.search.charAt(location.search.length-1);
+      // var categoryid = location.search.split("=")[1];
+       pageNum++;
+      $.ajax({
+        type: "post",
+        url: "./api/getMoreData.php",
+        data: {
+          categoryid:categoryid,
+          pageNum:pageNum,
+          pageSize:pageSize
+        },
+        dataType: "json",
+        success: function (res) {
+          
+          // console.log(res);//res是一个json格式的对象
+          if(res.code == 1){
+            var data = res.moredata;
+            console.log(data);//是个数组，每一项又是一个对象
+            var str = '';
+            $.each(data,function(index,value){
+              // str += '<div class="entry">\
+              //             <div class="head">\
+              //             <span class="sort">'+value['name']+'</span>\
+              //             <a href="javascript:;">'+value['title']+'</a>\
+              //           </div>\
+              //           <div class="main">\
+              //             <p class="info">'+value['nickname']+'发表于 '+value['created']+'</p>\
+              //             <p class="brief">'+value['content']+'</p>\
+              //             <p class="extra">\
+              //               <span class="reading">阅读('+value['views']+'</span>\
+              //               <span class="comment">评论('+value['commentCount']+')</span>\
+              //               <a href="javascript:;" class="like">\
+              //                 <i class="fa fa-thumbs-up"></i>\
+              //                 <span>赞('+value['likes']+')</span>\
+              //               </a>\
+              //               <a href="javascript:;" class="tags">\
+              //                 分类：<span>'+value['name']+'</span>\
+              //               </a>\
+              //             </p>\
+              //             <a href="javascript:;" class="thumb">\
+              //               <!-- <img src="static/uploads/hots_2.jpg" alt=""> -->\
+              //               <img src='+value['feature']+'alt="">\
+              //             </a>\
+              //           </div>\
+              //         </div>'
+
+              str += `<div class="entry">
+              <div class="head">
+                <span class="sort">${value['name']}</span>
+                <a href="dedail.php?id = ${value['id']}">${value['title']}</a>
+              </div>
+              <div class="main">
+                <p class="info">${value['nickname']} 发表于 ${value['created']}</p>
+                <p class="brief">${value['content']}</p>
+                <p class="extra">
+                  <span class="reading">阅读(${value['views']})</span>
+                  <span class="comment">评论(${value['commentCount']})</span>
+                  <a href="javascript:;" class="like">
+                    <i class="fa fa-thumbs-up"></i>
+                    <span>赞(${value['likes']})</span>
+                  </a>
+                  <a href="javascript:;" class="tags">
+                    分类：<span>${value['name']}</span>
+                  </a>
+                </p>
+                <a href="javascript:;" class="thumb">
+                  <!-- <img src="static/uploads/hots_2.jpg" alt=""> -->
+                  <img src="${value['feature']}" alt="">
+                </a>
+              </div>
+            </div>`;
+            })
+            $(str).insertBefore($('.loadmore'));
+            var totalpage = Math.ceil(res.total/pageSize);
+            if(totalpage==pageNum){
+              $('.loadmore .btn').hide();
+            }
+          }
+
+        }
+      });
+    })
+  })
+  
+  
+  
+  </script>
 </body>
 </html>

@@ -1362,3 +1362,21 @@ img {
     display: none;
   }
 }
+
+.loadmore{
+  text-align: center;
+  padding: 50px 0px;
+}
+.loadmore .btn{
+    border: 1px  solid #ccc;
+    border-radius: 7px;
+    padding:10px 20px;
+    cursor: pointer;
+}
+
+.content-detail{
+  padding: 10px;
+  text-indent: 2em;
+  line-height: 35px;
+  font-size: 16px;
+}
